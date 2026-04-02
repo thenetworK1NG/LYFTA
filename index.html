@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Admin Console</h1>
+  </header>
+  <main>
+    <section class="container">
+
+      <!-- ===== DRIVERS SECTION ===== -->
+      <div class="card">
+        <h2 class="card-title">Drivers</h2>
+        <div class="add-driver-row">
+          <input id="driverName" placeholder="Driver name" class="input" />
+          <button id="addDriverBtn" class="btn-primary">Add driver</button>
+        </div>
+        <div id="driversList" class="drivers-list">Loading drivers…</div>
+      </div>
+
+      <!-- ===== GEOFENCE SECTION ===== -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            Geofence
+          </h2>
+          <div id="statusPill" class="status-pill off">
+            <span class="status-dot"></span>
+            <span id="statusLabel">Disabled</span>
+          </div>
+        </div>
+
+        <!-- Toggle -->
+        <div class="fence-row toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-title">Geofence active</span>
+            <span class="toggle-sub" id="fenceDesc">No zone set</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="fenceToggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Map -->
+        <div id="fenceMap" class="fence-map"></div>
+
+        <!-- Controls -->
+        <div class="fence-controls">
+          <div class="fence-row">
+            <label class="field-label" for="radiusInput">Radius (km)</label>
+            <div class="radius-control">
+              <button id="radiusMinus" class="radius-btn">−</button>
+              <input type="number" id="radiusInput" min="1" max="500" step="1" value="15" class="radius-input" />
+              <button id="radiusPlus" class="radius-btn">+</button>
+            </div>
+          </div>
+
+          <div class="fence-row">
+            <label class="field-label" for="zoneLabel">Zone name</label>
+            <input type="text" id="zoneLabel" placeholder="e.g. Johannesburg Metro" maxlength="60" class="input input-sm" />
+          </div>
+
+          <div class="fence-row coords-row">
+            <span class="coords-text" id="coordsDisplay">Tap the map to set center</span>
+          </div>
+
+          <div class="fence-actions">
+            <button id="saveBtn" class="btn-primary" disabled>Save Zone</button>
+            <button id="clearBtn" class="btn-outline">Clear Zone</button>
+          </div>
+
+          <div id="panelMsg" class="panel-msg hidden"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
