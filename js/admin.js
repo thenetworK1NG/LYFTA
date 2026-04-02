@@ -73,11 +73,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const fenceResetBtn = document.getElementById('fenceResetBtn');
   const fenceCoords = document.getElementById('fenceCoords');
   const fenceMsg = document.getElementById('fenceMsg');
+  const maxTripInput = document.getElementById('maxTripInput');
+  const maxTripMinus = document.getElementById('maxTripMinus');
+  const maxTripPlus = document.getElementById('maxTripPlus');
 
   let fenceMap = null;
   let fenceCircle = null;
   let fenceCenter = null;   // {lat, lng}
   let fenceRadiusKm = 10;
+  let maxTripKm = 50;
   let fenceEnabled = false;
 
   // Init Leaflet map for geofence
@@ -171,6 +175,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
     drawFenceCircle();
   });
 
+  // Max trip distance controls
+  maxTripMinus.addEventListener('click', ()=>{
+    maxTripKm = Math.max(1, maxTripKm - 1);
+    maxTripInput.value = maxTripKm;
+  });
+  maxTripPlus.addEventListener('click', ()=>{
+    maxTripKm = Math.min(500, maxTripKm + 1);
+    maxTripInput.value = maxTripKm;
+  });
+  maxTripInput.addEventListener('change', ()=>{
+    let v = parseInt(maxTripInput.value, 10);
+    if (isNaN(v) || v < 1) v = 1;
+    if (v > 500) v = 500;
+    maxTripKm = v;
+    maxTripInput.value = v;
+  });
+
   // Save full geofence config
   fenceSaveBtn.addEventListener('click', async ()=>{
     if (!fenceCenter) { showFenceMsg('Click the map to set a center point first', 'error'); return; }
@@ -182,6 +203,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         lat: fenceCenter.lat,
         lng: fenceCenter.lng,
         radiusKm: fenceRadiusKm,
+        maxTripKm: maxTripKm,
         updatedAt: Date.now()
       });
       showFenceMsg('Zone saved', 'success');
@@ -214,6 +236,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
         fenceRadiusKm = data.radiusKm;
         radiusInput.value = fenceRadiusKm;
       }
+      if (typeof data.maxTripKm === 'number') {
+        maxTripKm = data.maxTripKm;
+        maxTripInput.value = maxTripKm;
+      }
       updateCoordsLabel();
       if (fenceCenter) drawFenceCircle();
     }).catch(e => console.error('Failed to load geofence', e));
@@ -232,6 +258,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (typeof data.radiusKm === 'number') {
       fenceRadiusKm = data.radiusKm;
       radiusInput.value = fenceRadiusKm;
+    }
+    if (typeof data.maxTripKm === 'number') {
+      maxTripKm = data.maxTripKm;
+      maxTripInput.value = maxTripKm;
     }
     updateCoordsLabel();
     if (fenceCenter) drawFenceCircle();

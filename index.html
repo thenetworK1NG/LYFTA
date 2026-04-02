@@ -59,11 +59,20 @@
       <!-- Controls -->
       <div class="fence-controls">
         <div class="fence-row">
-          <span class="field-label">Radius (km)</span>
+          <span class="field-label">Service zone (km)</span>
           <div class="radius-control">
             <button id="radiusMinus" class="radius-btn">−</button>
             <input type="number" id="radiusInput" class="radius-input" value="10" min="1" max="500" step="1" />
             <button id="radiusPlus" class="radius-btn">+</button>
+          </div>
+        </div>
+
+        <div class="fence-row">
+          <span class="field-label">Max trip distance (km)</span>
+          <div class="radius-control">
+            <button id="maxTripMinus" class="radius-btn">−</button>
+            <input type="number" id="maxTripInput" class="radius-input" value="50" min="1" max="500" step="1" />
+            <button id="maxTripPlus" class="radius-btn">+</button>
           </div>
         </div>
 
