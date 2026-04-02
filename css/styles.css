@@ -300,3 +300,68 @@ header {
   .fence-row { flex-wrap: wrap; gap: 8px; }
   .input-sm { max-width: 100%; flex: 1; }
 }
+
+/* ===== PRICING ===== */
+.currency-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.card-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: -4px 0 14px;
+  line-height: 1.5;
+}
+
+/* ===== HIKE ZONES LIST ===== */
+.hike-zones-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hike-zone-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: background 0.1s;
+}
+.hike-zone-item:hover { background: #fafafa; }
+
+.hike-zone-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hike-zone-info strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hike-zone-info span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.hike-zone-item .remove {
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(225,25,0,0.2);
+  background: var(--surface);
+  color: var(--red);
+  transition: background 0.15s;
+}
+.hike-zone-item .remove:hover { background: var(--red-light); }

@@ -269,4 +269,204 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Initialise map after a short delay to let the layout settle
   setTimeout(initFenceMap, 100);
+
+  // ===== PRICING =====
+  const priceNormalDayEl = document.getElementById('priceNormalDay');
+  const priceNormalNightEl = document.getElementById('priceNormalNight');
+  const priceHikeDayEl = document.getElementById('priceHikeDay');
+  const priceHikeNightEl = document.getElementById('priceHikeNight');
+  const priceNightHourEl = document.getElementById('priceNightHour');
+  const priceSaveBtn = document.getElementById('priceSaveBtn');
+  const priceResetBtn = document.getElementById('priceResetBtn');
+  const priceMsg = document.getElementById('priceMsg');
+
+  function showPriceMsg(text, type){
+    priceMsg.textContent = text;
+    priceMsg.className = 'panel-msg ' + type;
+    priceMsg.classList.remove('hidden');
+    clearTimeout(priceMsg._t);
+    priceMsg._t = setTimeout(()=>{ priceMsg.classList.add('hidden'); }, 3000);
+  }
+
+  function applyPricingData(data){
+    if (!data) return;
+    if (typeof data.normalDay === 'number') priceNormalDayEl.value = data.normalDay;
+    if (typeof data.normalNight === 'number') priceNormalNightEl.value = data.normalNight;
+    if (typeof data.hikeDay === 'number') priceHikeDayEl.value = data.hikeDay;
+    if (typeof data.hikeNight === 'number') priceHikeNightEl.value = data.hikeNight;
+    if (typeof data.nightStartHour === 'number') priceNightHourEl.value = data.nightStartHour;
+  }
+
+  // Live listener — syncs across admins
+  db.ref('settings/pricing').on('value', snap => {
+    const data = snap.val();
+    if (data) applyPricingData(data);
+  });
+
+  priceSaveBtn.addEventListener('click', async ()=>{
+    const normalDay = Math.max(1, Math.min(999, parseInt(priceNormalDayEl.value,10)||20));
+    const normalNight = Math.max(1, Math.min(999, parseInt(priceNormalNightEl.value,10)||30));
+    const hikeDay = Math.max(1, Math.min(999, parseInt(priceHikeDayEl.value,10)||35));
+    const hikeNight = Math.max(1, Math.min(999, parseInt(priceHikeNightEl.value,10)||50));
+    const nightStartHour = Math.max(0, Math.min(23, parseInt(priceNightHourEl.value,10)||22));
+    priceSaveBtn.disabled = true;
+    priceSaveBtn.textContent = 'Saving…';
+    try {
+      await db.ref('settings/pricing').set({ normalDay, normalNight, hikeDay, hikeNight, nightStartHour, updatedAt: Date.now() });
+      showPriceMsg('Pricing saved', 'success');
+    } catch(e){
+      console.error(e);
+      showPriceMsg('Failed to save pricing', 'error');
+    } finally {
+      priceSaveBtn.disabled = false;
+      priceSaveBtn.textContent = 'Save pricing';
+    }
+  });
+
+  priceResetBtn.addEventListener('click', ()=>{
+    db.ref('settings/pricing').once('value').then(snap => {
+      const data = snap.val();
+      if (data) applyPricingData(data);
+      else showPriceMsg('No saved pricing found', 'error');
+    });
+  });
+
+  // ===== PRICE HIKE ZONES =====
+  const hikeMapEl = document.getElementById('hikeMap');
+  const hikeRadiusInput = document.getElementById('hikeRadiusInput');
+  const hikeRadiusMinus = document.getElementById('hikeRadiusMinus');
+  const hikeRadiusPlus = document.getElementById('hikeRadiusPlus');
+  const hikeCoords = document.getElementById('hikeCoords');
+  const hikeAddBtn = document.getElementById('hikeAddBtn');
+  const hikeMsg = document.getElementById('hikeMsg');
+  const hikeZonesList = document.getElementById('hikeZonesList');
+
+  let hikeMap = null;
+  let hikePreviewCircle = null;
+  let hikeCenter = null;
+  let hikeRadiusKm = 5;
+  let hikeZoneCircles = {}; // keyed by zone id -> L.circle
+
+  function showHikeMsg(text, type){
+    hikeMsg.textContent = text;
+    hikeMsg.className = 'panel-msg ' + type;
+    hikeMsg.classList.remove('hidden');
+    clearTimeout(hikeMsg._t);
+    hikeMsg._t = setTimeout(()=>{ hikeMsg.classList.add('hidden'); }, 3000);
+  }
+
+  function initHikeMap(){
+    if (hikeMap) return;
+    hikeMap = L.map(hikeMapEl, { zoomControl: true }).setView([-26.2041, 28.0473], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'networKING Technology' }).addTo(hikeMap);
+    if (hikeMap.attributionControl) hikeMap.attributionControl.setPrefix('');
+    setTimeout(()=>{ try{ hikeMap.invalidateSize(); }catch(e){} }, 200);
+
+    hikeMap.on('click', (e)=>{
+      hikeCenter = { lat: e.latlng.lat, lng: e.latlng.lng };
+      drawHikePreview();
+      hikeCoords.textContent = `${hikeCenter.lat.toFixed(5)}, ${hikeCenter.lng.toFixed(5)}`;
+    });
+  }
+
+  function drawHikePreview(){
+    if (!hikeMap || !hikeCenter) return;
+    const radiusM = hikeRadiusKm * 1000;
+    if (hikePreviewCircle) {
+      hikePreviewCircle.setLatLng([hikeCenter.lat, hikeCenter.lng]);
+      hikePreviewCircle.setRadius(radiusM);
+    } else {
+      hikePreviewCircle = L.circle([hikeCenter.lat, hikeCenter.lng], {
+        radius: radiusM,
+        color: '#e67e22',
+        fillColor: '#e67e22',
+        fillOpacity: 0.15,
+        weight: 2,
+        dashArray: '6 4'
+      }).addTo(hikeMap);
+    }
+  }
+
+  hikeRadiusMinus.addEventListener('click', ()=>{
+    hikeRadiusKm = Math.max(1, hikeRadiusKm - 1);
+    hikeRadiusInput.value = hikeRadiusKm;
+    drawHikePreview();
+  });
+  hikeRadiusPlus.addEventListener('click', ()=>{
+    hikeRadiusKm = Math.min(100, hikeRadiusKm + 1);
+    hikeRadiusInput.value = hikeRadiusKm;
+    drawHikePreview();
+  });
+  hikeRadiusInput.addEventListener('change', ()=>{
+    let v = parseInt(hikeRadiusInput.value, 10);
+    if (isNaN(v) || v < 1) v = 1;
+    if (v > 100) v = 100;
+    hikeRadiusKm = v;
+    hikeRadiusInput.value = v;
+    drawHikePreview();
+  });
+
+  hikeAddBtn.addEventListener('click', async ()=>{
+    if (!hikeCenter) { showHikeMsg('Click the map to set a zone center first', 'error'); return; }
+    hikeAddBtn.disabled = true;
+    hikeAddBtn.textContent = 'Adding…';
+    try {
+      const r = db.ref('settings/hikeZones').push();
+      await r.set({ lat: hikeCenter.lat, lng: hikeCenter.lng, radiusKm: hikeRadiusKm, createdAt: Date.now() });
+      showHikeMsg('Hike zone added', 'success');
+      // clear preview
+      hikeCenter = null;
+      hikeCoords.textContent = 'Click map to set zone center';
+      if (hikePreviewCircle) { try{ hikeMap.removeLayer(hikePreviewCircle); }catch(e){} hikePreviewCircle = null; }
+    } catch(e){
+      console.error(e);
+      showHikeMsg('Failed to add zone', 'error');
+    } finally {
+      hikeAddBtn.disabled = false;
+      hikeAddBtn.textContent = 'Add zone';
+    }
+  });
+
+  function renderHikeZones(snapshot){
+    const val = snapshot.val() || {};
+    hikeZonesList.innerHTML = '';
+    // remove old circles from map
+    Object.values(hikeZoneCircles).forEach(c => { try{ hikeMap.removeLayer(c); }catch(e){} });
+    hikeZoneCircles = {};
+
+    const keys = Object.keys(val);
+    if (!keys.length) { hikeZonesList.innerHTML = '<div style="font-size:0.82rem;color:#888;text-align:center;padding:8px 0;">No hike zones yet</div>'; return; }
+
+    keys.forEach((k, i) => {
+      const z = val[k];
+      // draw circle on map
+      if (hikeMap && typeof z.lat === 'number' && typeof z.lng === 'number') {
+        const c = L.circle([z.lat, z.lng], {
+          radius: (z.radiusKm || 5) * 1000,
+          color: '#e67e22',
+          fillColor: '#e67e22',
+          fillOpacity: 0.12,
+          weight: 2
+        }).addTo(hikeMap);
+        hikeZoneCircles[k] = c;
+      }
+      // list item
+      const el = document.createElement('div');
+      el.className = 'hike-zone-item';
+      el.innerHTML = `<div class="hike-zone-info"><strong>Zone ${i+1}</strong><span>${z.lat.toFixed(4)}, ${z.lng.toFixed(4)} · ${z.radiusKm||5} km</span></div>`;
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'remove';
+      rmBtn.textContent = 'Remove';
+      rmBtn.addEventListener('click', async ()=>{
+        if (!confirm('Remove this hike zone?')) return;
+        try{ await db.ref('settings/hikeZones/'+k).remove(); showHikeMsg('Zone removed', 'success'); }catch(e){ showHikeMsg('Failed to remove', 'error'); }
+      });
+      el.appendChild(rmBtn);
+      hikeZonesList.appendChild(el);
+    });
+  }
+
+  db.ref('settings/hikeZones').on('value', renderHikeZones);
+
+  setTimeout(initHikeMap, 200);
 });

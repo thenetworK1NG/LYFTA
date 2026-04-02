@@ -89,6 +89,88 @@
       </div>
     </section>
 
+    <!-- ===== PRICING CARD ===== -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Pricing
+      </h2>
+
+      <div class="fence-controls">
+        <div class="fence-row">
+          <span class="field-label">Normal price (day) pp</span>
+          <div class="radius-control">
+            <span class="currency-label">R</span>
+            <input type="number" id="priceNormalDay" class="radius-input" value="20" min="1" max="999" step="1" />
+          </div>
+        </div>
+        <div class="fence-row">
+          <span class="field-label">Normal price (night) pp</span>
+          <div class="radius-control">
+            <span class="currency-label">R</span>
+            <input type="number" id="priceNormalNight" class="radius-input" value="30" min="1" max="999" step="1" />
+          </div>
+        </div>
+        <div class="fence-row">
+          <span class="field-label">Hike zone price (day) pp</span>
+          <div class="radius-control">
+            <span class="currency-label">R</span>
+            <input type="number" id="priceHikeDay" class="radius-input" value="35" min="1" max="999" step="1" />
+          </div>
+        </div>
+        <div class="fence-row">
+          <span class="field-label">Hike zone price (night) pp</span>
+          <div class="radius-control">
+            <span class="currency-label">R</span>
+            <input type="number" id="priceHikeNight" class="radius-input" value="50" min="1" max="999" step="1" />
+          </div>
+        </div>
+        <div class="fence-row">
+          <span class="field-label">Night starts at (hour, 0–23)</span>
+          <div class="radius-control">
+            <input type="number" id="priceNightHour" class="radius-input" value="22" min="0" max="23" step="1" />
+          </div>
+        </div>
+
+        <div class="fence-row fence-actions">
+          <button id="priceSaveBtn" class="btn-primary" style="flex:1">Save pricing</button>
+          <button id="priceResetBtn" class="btn-outline">Reset</button>
+        </div>
+        <div id="priceMsg" class="panel-msg hidden"></div>
+      </div>
+    </section>
+
+    <!-- ===== PRICE HIKE ZONES CARD ===== -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Price Hike Zones
+      </h2>
+      <p class="card-sub">Click the map to place a hike zone center, set a radius, then add it. Passengers booking from inside a hike zone pay increased rates.</p>
+
+      <div id="hikeMap" class="fence-map"></div>
+
+      <div class="fence-controls">
+        <div class="fence-row">
+          <span class="field-label">Zone radius (km)</span>
+          <div class="radius-control">
+            <button id="hikeRadiusMinus" class="radius-btn">−</button>
+            <input type="number" id="hikeRadiusInput" class="radius-input" value="5" min="1" max="100" step="1" />
+            <button id="hikeRadiusPlus" class="radius-btn">+</button>
+          </div>
+        </div>
+        <div class="fence-row coords-row">
+          <span id="hikeCoords" class="coords-text">Click map to set zone center</span>
+        </div>
+        <div class="fence-row fence-actions">
+          <button id="hikeAddBtn" class="btn-primary" style="flex:1">Add zone</button>
+        </div>
+        <div id="hikeMsg" class="panel-msg hidden"></div>
+      </div>
+
+      <div id="hikeZonesList" class="hike-zones-list"></div>
+    </section>
+
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
